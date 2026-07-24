@@ -1,0 +1,44 @@
+name: DACH Delay Monitor
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # alle 15 Minuten, Europe/Berlin via TZ unten
+  workflow_dispatch:           # jederzeit manuell startbar
+
+jobs:
+  run:
+    name: Run delay check
+    runs-on: ubuntu-latest
+    timeout-minutes: 9          # sicherstellen dass kein Overlap mit naechstem Run
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Run delay monitor
+        env:
+          # Google Auth (Refresh Token aus GitHub Secret)
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          # SMTP
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: "587"
+          SMTP_USER: actuals_dach_logistics@hellofresh.de
+          SMTP_FROM: actuals_dach_logistics@hellofresh.de
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          # Slack
+          SLACK_DELAY_WEBHOOK: ${{ secrets.SLACK_DELAY_WEBHOOK }}
+          # TomTom
+          TOMTOM_API_KEY: ${{ secrets.TOMTOM_API_KEY }}
+          # Timezone hint
+          TZ: Europe/Berlin
+        run: node dist/main.js
