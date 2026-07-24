@@ -27,8 +27,10 @@ jobs:
 
       - name: Run delay monitor
         env:
-          # Google Auth (Refresh Token aus GitHub Secret)
+          # Google Auth
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           # SMTP
           SMTP_HOST: smtp.gmail.com
           SMTP_PORT: "587"
